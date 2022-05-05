@@ -13,6 +13,7 @@ if (isset($_POST["addFavorite"])) {
         array_push($favorites, json_decode($_POST["addFavorite"], true));
         file_put_contents('favorites.json', json_encode($favorites)); // Salva o arquivo
     }
+    die();
 } else if (isset($_POST["removeFavorite"])) {
     define("R_FAVORITE", json_decode($_POST["removeFavorite"]));
     if (in_array(R_FAVORITE, $favorites)) { // Verifica se o favorito existe no array
@@ -23,6 +24,7 @@ if (isset($_POST["addFavorite"])) {
         $favorites = array_values($favorites);
         file_put_contents('favorites.json', json_encode($favorites)); // Salva o arquivo
     }
+    die();
 } else if (isset($_POST["directory"])) {
     // Lê os arquivos e pastas da pasta atual e pega os seus tipos
     $directory = json_decode($_POST["directory"]);
@@ -40,6 +42,12 @@ if (isset($_POST["addFavorite"])) {
     die();
 } else if (isset($_POST["getFavorites"])) {
     echo json_encode($favorites);
+    die();
+}
+if (isset($_POST["getUser"])) {
+    // pega o nome do usuário logado na máquina
+    define("USER", getenv('USERNAME'));
+    echo json_encode(USER);
     die();
 }
 ?>
@@ -97,12 +105,29 @@ if (isset($_POST["addFavorite"])) {
                 transform: translateX(0);
             }
         }
+
+        .alert {
+            animation: alertFall 1s ease-in-out !important;
+        }
+
+        /* Animação de surgimento do alerta */
+        @keyframes alertFall {
+            from {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
 <body>
     <main id="app" class="py-4">
-        <div class="container">
+        <div class="container position-relative">
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
@@ -172,6 +197,9 @@ if (isset($_POST["addFavorite"])) {
                     </div>
                 </div>
             </div>
+
+            <div class="position-fixed" id="alerts" style="bottom: 30px; right: 20px;"></div>
+        </div>
     </main>
     <script src="https://kit.fontawesome.com/274af9ab8f.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
@@ -182,6 +210,8 @@ if (isset($_POST["addFavorite"])) {
             data() {
                 return {
                     directory: ".",
+                    userName: null,
+                    alert: false,
                     files: [],
                     folders: [],
                     historic: [],
@@ -207,17 +237,44 @@ if (isset($_POST["addFavorite"])) {
             },
             // Inicialização
             beforeMount: function() {
-                
+                this.getUser()
                 this.openFolder();
                 this.getFavorites();
+                // Rechama a função a cada 1 min
+                setInterval(() => {
+                    this.openFolder();
+                }, 60000);
             },
+            watch: {
+                alert: function(value) {
+                    if (!value) {
+                        $(".alert").fadeTo(1000, 0.5).slideUp(500, function() {
+                            $(this).remove();
+                        });
+                    }
+                }
+            },
+
             methods: {
+                newAlert: function(text, type) {
+                    const idCount = $(".alert").length; // Conta quantos alertas existem
+                    console.log(idCount);
+                    $("#alerts").append(`<div id="alert-${idCount}" class="alert alert-${type}">${text}</div>`);
+                    // conta 3 seguntos
+                    setTimeout(() => {
+                        $(`#alert-${idCount}`).fadeTo(1000 * (idCount / 2), 0.5).slideUp(500, function() {
+                            $(this).remove();
+                        });
+                    }, 3000);
+                },
+
                 setHistory: function(name) {
                     // Veridica se o link já existe no historico
                     if (!this.historic.includes(name)) {
                         this.historic.push(name);
                     }
                 },
+
                 openFolder: function(folder = './') {
                     const SELF = this;
                     SELF.directory = folder;
@@ -253,6 +310,20 @@ if (isset($_POST["addFavorite"])) {
                                     }
                                 });
                             });
+                        }
+                    });
+                },
+
+                getUser: function() {
+                    const SELF = this;
+                    $.post({
+                        url: 'index.php',
+                        type: 'POST',
+                        data: {
+                            getUser: true
+                        },
+                        success: function(data) {
+                            SELF.userName = JSON.parse(data);
                         }
                     });
                 },
@@ -306,6 +377,11 @@ if (isset($_POST["addFavorite"])) {
                         return new bootstrap.Tooltip(tooltipTriggerEl)
                     })
                 }
+                
+                setTimeout(() => {
+                    this.newAlert(`Seja bem vindo ${this.userName}!`, "success")
+                    this.newAlert("A lista será atualizada daqui <b>1</b> minuto.", "info")
+                }, 3000);
             }
         }).mount('#app')
     </script>
