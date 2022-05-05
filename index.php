@@ -162,7 +162,7 @@ if (isset($_POST["addFavorite"])) {
                             <p class="text-center">
                                 <small>
                                     <i class="fa fa-copyright"></i>
-                                    <span class="px-2">Copyright 2020</span>
+                                    <span class="px-2">Copyright 2022</span>
                                     <span>-</span>
                                     <span class="px-2">Desenvolvido por</span>
                                     <span>Renzo Nogueira</span>
@@ -309,7 +309,6 @@ if (isset($_POST["addFavorite"])) {
             }
         }).mount('#app')
     </script>
-    <!-- Importa o ajax cdn -->
 </body>
 
 </html>
