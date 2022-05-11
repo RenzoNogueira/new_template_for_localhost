@@ -61,9 +61,57 @@ if (isset($_POST["getUser"])) {
     <title>Localhost</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <style>
+        html {
+            --background_1: 'none',
+                --background_2: 'none',
+                --background_3: 'none',
+                --background_4: 'none',
+                --text: '#000000'
+        }
+
+        /* TEMAS */
+        body {
+            background-color: var(--background_1);
+            transition: background-color 1s;
+        }
+
+        a,
+        button,
+        input,
+        textarea,
+        p,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        span {
+            color: var(--text) !important;
+            transition: background-color 1s;
+        }
+
+        .card-header {
+            background-color: var(--background_2);
+            transition: background-color 1s;
+        }
+
+        .card-body {
+            background-color: var(--background_4);
+            transition: background-color 1s;
+        }
+
+        .card-footer {
+            background-color: var(--background_3);
+            transition: background-color 1s;
+        }
+
         .list-group-item:hover {
             background-color: #f5f5f5;
+            transition: background-color 1s;
         }
+
+        /* TEMAS */
 
         .file-item.bg-light {
             animation: slideInLeft 1s ease-in-out !important;
@@ -122,6 +170,30 @@ if (isset($_POST["getUser"])) {
                 transform: translateY(0);
             }
         }
+
+        .btn-theme {
+            position: relative;
+            animation: btn-theme-animation 1s ease-in-out !important;
+        }
+
+        /* btn-theme surge subindo girando em 360 graus  */
+        @keyframes btn-theme-animation {
+            0% {
+                opacity: 0;
+                transform: rotate(0deg);
+                transform: translateY(30%);
+            }
+
+            50% {
+                transform: rotate(660deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: rotate(660deg);
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -131,8 +203,10 @@ if (isset($_POST["getUser"])) {
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h3>Lista de arquivos e pastas</h3>
+                            <!-- Icone de sol  -->
+                            <i class="fas fa-sun fa-2x fs-5 float-right text-dark btn-theme light" role="button" data-bs-toggle="tooltip" data-bs-placement="left" title="Alternar tema"></i>
                         </div>
                         <div class="card-body">
                             <!-- lista horizontal de favoritos -->
@@ -232,6 +306,22 @@ if (isset($_POST["getUser"])) {
                         ".svg": "fas fa-file-image",
                         ".mp3": "fas fa-file-audio",
                         ".mp4": "fas fa-file-video",
+                    },
+                    themes: {
+                        light: {
+                            background_1: 'none',
+                            background_2: 'none',
+                            background_3: 'none',
+                            background_4: 'none',
+                            text: '#000000',
+                        },
+                        dark: {
+                            background_1: '#181818',
+                            background_2: '#2f2f2f',
+                            background_3: '#474747',
+                            background_4: '#5e5e5e',
+                            text: '#ffffff',
+                        }
                     }
                 }
             },
@@ -258,7 +348,6 @@ if (isset($_POST["getUser"])) {
             methods: {
                 newAlert: function(text, type) {
                     const idCount = $(".alert").length; // Conta quantos alertas existem
-                    console.log(idCount);
                     $("#alerts").append(`<div id="alert-${idCount}" class="alert alert-${type}">${text}</div>`);
                     // conta 3 seguntos
                     setTimeout(() => {
@@ -368,20 +457,49 @@ if (isset($_POST["getUser"])) {
                     }).done(function(data) {
                         SELF.getFavorites();
                     });
+                },
+                setTheme: function(theme) {
+                    const SELF = this;
+                    SELF.themes[theme].background;
+                    SELF.themes[theme].text;
+
+                    Object.keys(SELF.themes[theme]).map(function(key) {
+                        $(`html`).css(`--${key}`, SELF.themes[theme][key]);
+                    });
                 }
             },
             mounted: function() {
+                const SELF = this;
                 window.onload = function() {
                     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
                     var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                         return new bootstrap.Tooltip(tooltipTriggerEl)
                     })
                 }
-                
+
                 setTimeout(() => {
                     this.newAlert(`Seja bem vindo ${this.userName}!`, "success")
                     this.newAlert("A lista será atualizada daqui <b>1</b> minuto.", "info")
+                    if (sessionStorage.getItem("theme") == "dark") {
+                        SELF.setTheme(sessionStorage.getItem("theme"));
+                        $(".btn-theme").toggleClass("dark light");
+                        $(".btn-theme").toggleClass("fa-sun text-dark fa-moon text-light");
+                        SELF.newAlert("O tema escuro está ativado!", "warning");
+                    }
                 }, 3000);
+                $(".btn-theme").click(function() {
+                    $(this).toggleClass("dark light");
+                    $(this).toggleClass("fa-sun text-dark fa-moon text-light");
+                    if ($(this).hasClass("dark")) {
+                        SELF.setTheme("dark");
+                        sessionStorage.setItem("theme", "dark");
+                        SELF.newAlert("O tema escuro ativado!", "success");
+                    } else {
+                        SELF.setTheme("light");
+                        sessionStorage.setItem("theme", "light");
+                        SELF.newAlert("O tema claro ativado!", "success");
+                    }
+                });
             }
         }).mount('#app')
     </script>
