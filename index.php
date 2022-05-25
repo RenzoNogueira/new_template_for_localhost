@@ -121,6 +121,11 @@ if (isset($_POST["getUser"])) {
             animation: slideInRight 1s ease-in-out !important;
         }
 
+        .element-item:hover {
+            filter: brightness(0.9);
+            transform: scale(1.009);
+        }
+
         /* Deslizar da esquerda para a direita */
         @keyframes slideInLeft {
             0% {
@@ -233,7 +238,7 @@ if (isset($_POST["getUser"])) {
                                     <li class="list-group-item text-center" v-show="files.length === 0">
                                         <div class="spinner-border text-secondary" role="status"></div>
                                     </li>
-                                    <li v-for="(file, index) in files" class="list-group-item border-0">
+                                    <li v-for="(file, index) in files" class="list-group-item element-item border-0">
                                         <!-- verifica de o index é par ou impar -->
                                         <div :class="['row','file-item', index % 2 === 0 ? 'bg-light' : 'bg-white']">
                                             <div class="col-md-12 d-flex justify-content-between p-0">
