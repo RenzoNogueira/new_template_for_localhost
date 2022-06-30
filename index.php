@@ -304,6 +304,8 @@ if (isset($_POST["getUser"])) {
                         ".html": "fab fa-html5",
                         ".json": "fab fa-js-square",
                         ".py": "fab fa-python",
+                        ".gitignore": "fab fa-git",
+                        ".md": "fas fa-file-alt",
                         ".txt": "fas fa-file-alt",
                         ".pdf": "fas fa-file-pdf",
                         ".jpg": "fas fa-file-image",
