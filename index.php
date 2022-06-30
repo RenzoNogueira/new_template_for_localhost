@@ -303,6 +303,7 @@ if (isset($_POST["getUser"])) {
                         ".css": "fab fa-css",
                         ".html": "fab fa-html5",
                         ".json": "fab fa-js-square",
+                        ".py": "fab fa-python",
                         ".txt": "fas fa-file-alt",
                         ".pdf": "fas fa-file-pdf",
                         ".jpg": "fas fa-file-image",
@@ -311,6 +312,20 @@ if (isset($_POST["getUser"])) {
                         ".svg": "fas fa-file-image",
                         ".mp3": "fas fa-file-audio",
                         ".mp4": "fas fa-file-video",
+                        ".zip": "fas fa-file-archive",
+                        ".rar": "fas fa-file-archive",
+                        ".7z": "fas fa-file-archive",
+                        ".tar": "fas fa-file-archive",
+                        ".gz": "fas fa-file-archive",
+                        ".bz2": "fas fa-file-archive",
+                        ".xz": "fas fa-file-archive",
+                        ".iso": "fas fa-file-archive",
+                        ".doc": "fas fa-file-word",
+                        ".docx": "fas fa-file-word",
+                        ".xls": "fas fa-file-excel",
+                        ".xlsx": "fas fa-file-excel",
+                        ".ppt": "fas fa-file-powerpoint",
+                        ".pptx": "fas fa-file-powerpoint"
                     },
                     themes: {
                         light: {
@@ -393,16 +408,34 @@ if (isset($_POST["getUser"])) {
                                     type: SELF.fileTypes["folder"],
                                 });
                             });
-
                             Object.keys(dataFiles["files"]).forEach(function(key) {
+                                fileTypeExist = false;
                                 Object.keys(SELF.fileTypes).forEach(function(type) {
-                                    if (dataFiles["files"][key].includes(type)) {
-                                        SELF.files.push({
-                                            name: dataFiles["files"][key],
-                                            type: SELF.fileTypes[type],
-                                        });
+                                    existItem = false;
+                                    for (let i = 0; i < SELF.files.length; i++) {
+                                        if (SELF.files[i].name === dataFiles["files"][key]) {
+                                            existItem = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!existItem) {
+                                        if (dataFiles["files"][key].includes(type)) {
+                                            console.log(type);
+                                            SELF.files.push({
+                                                name: dataFiles["files"][key],
+                                                type: SELF.fileTypes[type],
+                                            });
+                                            fileTypeExist = true;
+                                            return;
+                                        }
                                     }
                                 });
+                                if (!fileTypeExist) {
+                                    SELF.files.push({
+                                        name: dataFiles["files"][key],
+                                        type: SELF.fileTypes["file"],
+                                    });
+                                }
                             });
                         }
                     });
