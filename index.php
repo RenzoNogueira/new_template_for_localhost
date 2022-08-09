@@ -422,7 +422,6 @@ if (isset($_POST["getUser"])) {
                                     }
                                     if (!existItem) {
                                         if (dataFiles["files"][key].includes(type)) {
-                                            console.log(type);
                                             SELF.files.push({
                                                 name: dataFiles["files"][key],
                                                 type: SELF.fileTypes[type],
