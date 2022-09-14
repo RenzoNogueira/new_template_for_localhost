@@ -114,22 +114,23 @@
         }
 
         .item-grid .card-body {
-			background-color: transparent;
-		}
+            background-color: transparent;
+        }
 
         .item-grid .card-body a {
-			color: black !important;
-		}
-		
-		.dark .item-grid:hover {
-			background-color: var(--bs-danger) !important;
+            color: black !important;
         }
-		
-		.light .item-grid:hover {
-			background-color: var(--bs-secondary) !important;
+
+        .dark .item-grid:hover {
+            background-color: var(--bs-danger) !important;
         }
-		.item-grid:hover a, .item-grid:hover span, .item-grid:hover i:not(.fa-folder) {
-			color: white !important;
+
+        .light .item-grid:hover {
+            background-color: var(--bs-secondary) !important;
+        }
+
+        .item-grid:hover a, .item-grid:hover span, .item-grid:hover i:not(.fa-folder), .favorite:hover a {
+            color: white !important;
         }
 
         /* TEMAS */
@@ -250,7 +251,8 @@
 
 <body>
 <main id="app" class="py-4">
-	<div class="container position-relative list-files ligth" :class="{'light': themeAplycated === 'light', 'dark': themeAplycated === 'dark'}">
+	<div class="container position-relative list-files ligth"
+		 :class="{'light': themeAplycated === 'light', 'dark': themeAplycated === 'dark'}">
 		<div class="row">
 			<div class="col-md-12">
 				<div class="card">
@@ -270,7 +272,7 @@
 						<div class="row">
 							<div class="col-md-12">
 								<h4>Favoritos</h4>
-								<button v-for="favorite in favorites" class="btn btn-outline-secondary m-1"
+								<button v-for="favorite in favorites" class="btn favorite btn-outline-secondary m-1"
 										data-bs-toggle="tooltip" data-bs-placement="bottom" :title="favorite">
 								<a :href="favorite" target="_blank"
 								   class="text-decoration-none text-dark m-2">{{favorite.substring( 0, 6 )}}...</a>
@@ -324,7 +326,8 @@
 											<div class="col-10">
 												<h5 class="card-title">
 													<i :class="[file.type, (file.type.includes('fa-folder') ? 'text-warning': 'text-secondary')]"></i>
-													<a class="ms-2 text-decoration-none" @click="setHistory({name:file.name, type:file.type})"
+													<a class="ms-2 text-decoration-none"
+													   @click="setHistory({name:file.name, type:file.type})"
 													   :href="file.name" :title="file.name"
 													   class="text-decoration-none text-dark"
 													   target="_blank">{{ file.name
@@ -448,7 +451,7 @@
 				this.openFolder();
 			}, 60000 );
 		},
-		
+
 		watch: {
 			alert: function ( value ) {
 				if ( !value ) {
@@ -587,7 +590,7 @@
 					SELF.getFavorites();
 				} );
 			},
-			
+
 			setTheme: function ( theme ) {
 				const SELF = this;
 				SELF.themes[ theme ].background;
@@ -600,7 +603,7 @@
 				SELF.themeAplycated = theme;
 			}
 		},
-		
+
 		mounted: function () {
 			const SELF = this;
 			window.onload = function () {
@@ -615,16 +618,19 @@
 			setTimeout( () => {
 				this.newAlert( `Seja bem vindo ${this.userName}!`, "success" )
 				this.newAlert( "A lista será atualizada daqui <b>1</b> minuto.", "info" )
-				SELF.themeAplycated = sessionStorage.getItem( "theme" )
-				if ( SELF.themeAplycated === "dark" ) {
-					SELF.setTheme( SELF.themeAplycated );
-					BTN_THEME.toggleClass( "dark light" );
-					BTN_THEME.toggleClass( "fa-sun text-dark fa-moon text-light" );
-					BTN_LAYOUT.toggleClass( "dark light" );
-					BTN_LAYOUT.toggleClass( "text-dark text-light" );
-					SELF.newAlert( "O tema escuro está ativado!", "warning" );
+				const THEME_SAVE = localStorage.getItem( "theme" );
+				if ( THEME_SAVE ) { // Verifica se existe um tema salvo
+					SELF.themeAplycated = THEME_SAVE
+					if ( SELF.themeAplycated === "dark" ) {
+						SELF.setTheme( SELF.themeAplycated );
+						BTN_THEME.toggleClass( "dark light" );
+						BTN_THEME.toggleClass( "fa-sun text-dark fa-moon text-light" );
+						BTN_LAYOUT.toggleClass( "dark light" );
+						BTN_LAYOUT.toggleClass( "text-dark text-light" );
+						SELF.newAlert( "O tema escuro está ativado!", "warning" );
+					}
 				}
-				
+
 				if ( sessionStorage.getItem( "layout" ) == "list" ) {
 					SELF.themes.layout.selected = true;
 					BTN_LAYOUT.toggleClass( "list grid" );
@@ -664,7 +670,7 @@
 					SELF.newAlert( "O layout de grade ativado!", "success" );
 				}
 				SELF.themes.layout.selected = !SELF.themes.layout.selected; // Atualiza o layout
-				
+
 				// Recarrega o layout do vue
 				SELF.$forceUpdate();
 			} );
