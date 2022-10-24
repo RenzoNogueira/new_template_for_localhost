@@ -351,8 +351,8 @@
 			</div>
 
 			<!-- Footer com Copyright -->
-			<div class="row mt-2">
-				<div class="col-md-12">
+			<div class="mt-2">
+				<div>
 					<div class="card">
 						<div class="card-footer">
 							<p class="text-center">
