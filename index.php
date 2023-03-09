@@ -46,7 +46,7 @@ if (isset($_POST["addFavorite"])) {
 	die();
 } else if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
-	$key = "sk-xxxxxxxx";
+	$key = "sk-xxxxxxxxxxxxx";
 	// Requisição para a API da Open AI gpt-3.5-turbo
 	$curl = curl_init();
 	$headers = array(
@@ -383,7 +383,7 @@ if (isset($_POST["getUser"])) {
 							<h3>Assistente</h3>
 						</div>
 						<div id="chat" class="card-body position-relative text-center px-4 pb-5 d-flex flex-column justify-content-center align-items-baseline" style="max-height: 480px;">
-							<div id="response" style="overflow-y: auto;max-height: 480px;">
+							<div id="response" class="pb-4" style="overflow-y: auto;max-height: 480px;">
 								<div v-for="message in messages" class="card my-2 w-100 border-0" :class="{ 'd-flex justify-content-end': message.role === 'user' }">
 									<div class="card-body p-0" :class="{ 'justify-content-end': message.role === 'user' }">
 										<div class="text-start border border-light shadow-sm rounded p-2" :class="{ 'text-end bg-primary text-light': message.role === 'user' }">
