@@ -123,7 +123,6 @@ if (isset($_POST["getUser"])) {
 
 		a,
 		button,
-		input,
 		textarea,
 		p,
 		h1,
