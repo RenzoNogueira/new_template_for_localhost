@@ -46,7 +46,7 @@ if (isset($_POST["addFavorite"])) {
 	die();
 } else if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
-	$key = "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";
+	$key = "sk-xxxxxxxxxxxxxxx";
 	// Requisição para a API da Open AI gpt-3.5-turbo
 	$curl = curl_init();
 	$headers = array(
