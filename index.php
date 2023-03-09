@@ -46,7 +46,7 @@ if (isset($_POST["addFavorite"])) {
 	die();
 } else if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
-	$key = "sk-xxxxxxxxxxxxxxxxxxxxxxx";
+	$key = "sk-xxxxxxxx";
 	// Requisição para a API da Open AI gpt-3.5-turbo
 	$curl = curl_init();
 	$headers = array(
@@ -492,7 +492,7 @@ if (isset($_POST["getUser"])) {
 					message: "",
 					messages: [{
 						role: "assistant",
-						content: "Olá, eu sou o assistant do Renzo Nogueira, como posso te ajudar?"
+						content: "Olá, eu sou o seu assistente virtual, como posso te ajudar?"
 					}]
 				}
 			},
