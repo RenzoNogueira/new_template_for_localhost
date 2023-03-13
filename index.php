@@ -15,7 +15,8 @@ if (isset($_POST["addFavorite"])) {
 		file_put_contents('favorites.json', json_encode($favorites)); // Salva o arquivo
 	}
 	die();
-} else if (isset($_POST["removeFavorite"])) {
+}
+if (isset($_POST["removeFavorite"])) {
 	define("R_FAVORITE", json_decode($_POST["removeFavorite"]));
 	if (in_array(R_FAVORITE, $favorites)) { // Verifica se o favorito existe no array
 		// Remove do array
@@ -26,7 +27,8 @@ if (isset($_POST["addFavorite"])) {
 		file_put_contents('favorites.json', json_encode($favorites)); // Salva o arquivo
 	}
 	die();
-} else if (isset($_POST["directory"])) {
+}
+if (isset($_POST["directory"])) {
 	// Lê os arquivos e pastas da pasta atual e pega os seus tipos
 	$directory = json_decode($_POST["directory"]);
 	$data = scandir($directory);
@@ -41,12 +43,14 @@ if (isset($_POST["addFavorite"])) {
 	});
 	echo json_encode($files);
 	die();
-} else if (isset($_POST["getFavorites"])) {
+}
+if (isset($_POST["getFavorites"])) {
 	echo json_encode($favorites);
 	die();
-} else if (isset($_POST["messages"])) {
+}
+if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
-	$key = "sk-xxxxxxxxxxxxxxx";
+	$key = "sk-xxxxxxxxxxxxxxxxxxxxxx";
 	// Requisição para a API da Open AI gpt-3.5-turbo
 	$curl = curl_init();
 	$headers = array(
@@ -94,6 +98,20 @@ if (isset($_POST["getUser"])) {
 	// pega o nome do usuário logado na máquina
 	define("USER", getenv('USERNAME'));
 	echo json_encode(USER);
+	die();
+}
+if (isset($_POST["historic"])) {
+	// Salva o histórico de conversa nos cookies
+	$historic = json_decode($_POST["historic"]);
+	// Uma semana
+	setcookie("historic", json_encode($historic), time() + 60 * 60 * 24 * 7);
+	die();
+}
+
+if (isset($_POST["getHistoric"])) {
+	// Pega o histórico de conversa nos cookies
+	$historic = json_decode($_COOKIE["historic"]);
+	echo json_encode($historic);
 	die();
 }
 ?>
@@ -398,6 +416,18 @@ if (isset($_POST["getUser"])) {
 							</div>
 						</div>
 					</div>
+
+					<!-- Gráfico de bolinhas -->
+					<div class="card mt-3">
+						<div class="card-header d-flex justify-content-between align-items-center">
+							<h3>Histórico de acessos</h3>
+						</div>
+						<div class="card-body">
+							<div class="chart-container">
+								<canvas id="bubbleChart"></canvas>
+							</div>
+						</div>
+					</div>
 				</div>
 
 				<!-- Footer com Copyright -->
@@ -421,6 +451,7 @@ if (isset($_POST["getUser"])) {
 	<script src="https://kit.fontawesome.com/274af9ab8f.js" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script src="https://unpkg.com/vue@3"></script>
 	<script>
 		Vue.createApp({
@@ -528,11 +559,46 @@ if (isset($_POST["getUser"])) {
 					}, 3000);
 				},
 
-				setHistory: function(name) {
-					// Verifica se o link já existe no histórico
-					if (!this.historic.includes(name)) {
-						this.historic.push(name);
+				setHistory: function(itemClicked) {
+					if (this.historic.find(item => item.name === itemClicked.name)) {
+						// Busca o item no array e atualiza o numero de acessos e a data
+						this.historic.find(item => item.name === itemClicked.name).accesses++;
+						this.historic.find(item => item.name === itemClicked.name).date.push(new Date());
+					} else {
+						// Adiciona o item no array
+						this.historic.push({
+							name: itemClicked.name,
+							date: [new Date()],
+							type: itemClicked.type,
+							accesses: 1
+						});
 					}
+
+					$.post({
+						url: 'index.php',
+						type: 'POST',
+						data: {
+							historic: JSON.stringify(this.historic)
+						}
+					});
+				},
+
+				getHistory: function() {
+					const SELF = this;
+					$.post({
+						url: 'index.php',
+						type: 'POST',
+						data: {
+							getHistoric: true
+						},
+						success: function(data) {
+							data = JSON.parse(data);
+							// remove o item do array se tiver o name igual a "./"
+							data = data.filter(item => item !== "./");
+							SELF.historic = data;
+							SELF.bubbleChart();
+						}
+					});
 				},
 
 				openFolder: function(folder = './') {
@@ -693,11 +759,79 @@ if (isset($_POST["getUser"])) {
 						}, 1000);
 						$("#loadMessage").remove();
 					});
-				}
+				},
+
+				// Grafico de do historico de acesso
+				bubbleChart: function() {
+					const SELF = this;
+
+					let dadaChart = {
+						labels: "Historico de acesso",
+						datasets: []
+					}
+
+					SELF.historic.forEach(function(item) {
+						dadaChart.datasets.push({
+							label: item.name,
+							data: item.date.map(function(date, index) {
+								// Exemplo de retorno: 10:23 = 10.23
+								return {
+									x: new Date(date).getHours() + (new Date(date).getMinutes() / 100),
+									y: new Date(date).getDay(),
+									r: item.accesses
+								};
+							}),
+							backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+							borderColor: "#3e95cd",
+						});
+					});
+
+					const bubbleChart = new Chart(document.getElementById("bubbleChart"), {
+						type: 'bubble',
+						data: dadaChart,
+						options: {
+							legend: {
+								display: false
+							},
+							scales: {
+								xAxes: [{
+									ticks: {
+										display: false
+									},
+									gridLines: {
+										display: false
+									}
+								}],
+								yAxes: [{
+									ticks: {
+										display: false
+									},
+									gridLines: {
+										display: false
+									}
+								}]
+							},
+							tooltips: {
+								callbacks: {
+									label: function(tooltipItem, data) {
+										var label = data.datasets[tooltipItem.datasetIndex].label || '';
+										if (label) {
+											label += ': hr';
+										}
+										label += Math.round(tooltipItem.yLabel * 100) / 100;
+										return label;
+									}
+								}
+							}
+						}
+					});
+
+				},
 			},
 
 			mounted: function() {
 				const SELF = this;
+				SELF.getHistory();
 				window.onload = function() {
 					const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
 					const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
