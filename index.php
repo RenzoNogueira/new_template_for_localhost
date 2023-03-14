@@ -510,7 +510,7 @@ if (isset($_POST["getHistoric"])) {
 					message: "",
 					messages: [{
 						role: "assistant",
-						content: "Olá, eu sou o seu assistente virtual, como posso te ajudar?"
+						content: "Olá {{userName}}, eu sou o seu assistente virtual, como posso te ajudar?"
 					}]
 				}
 			},
@@ -652,8 +652,15 @@ if (isset($_POST["getHistoric"])) {
 						},
 						success: function(data) {
 							SELF.userName = JSON.parse(data);
+							SELF.setUserNameChat(SELF.userName); // Define o nome do usuário no chat
 						}
 					});
+				},
+
+				// Função para definir o nome do usuário no chat
+				setUserNameChat: function(name) {
+					const SELF = this;
+					SELF.messages[0].content = this.messages[0].content.replace("{{userName}}", name);
 				},
 
 				// Função para carregar os favoritos
