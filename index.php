@@ -564,6 +564,11 @@ if (isset($_POST["getHistoric"])) {
 							type: itemClicked.type,
 							accesses: 1
 						});
+
+						// Se for maior que 5, remove o primeiro item
+						if (this.historic.length > 5) {
+							this.historic.shift();
+						}
 					}
 
 					$.post({
