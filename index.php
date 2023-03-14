@@ -103,6 +103,10 @@ if (isset($_POST["getUser"])) {
 if (isset($_POST["historic"])) {
 	// Salva o histórico de conversa nos cookies
 	$historic = json_decode($_POST["historic"]);
+	// Se for maior que 5, remove o primeiro item do array
+	while (count($historic) > 5) {
+		array_shift($historic);
+	}
 	// Uma semana
 	setcookie("historic", json_encode($historic), time() + 60 * 60 * 24 * 7);
 	die();
@@ -424,7 +428,7 @@ if (isset($_POST["getHistoric"])) {
 						<div class="card">
 							<div class="card-footer">
 								<p class="text-center">
-									<small> <i class="fa fa-copyright"></i> <span class="px-2">Copyright 2022</span>
+									<small> <i class="fa fa-copyright"></i> <span class="px-2">Copyright <?= date('Y') ?></span>
 										<span>-</span> <span class="px-2">Desenvolvido por</span>
 										<span>Renzo Nogueira</span>
 									</small>
