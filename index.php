@@ -143,7 +143,7 @@ if (isset($_POST["getHistoric"])) {
 			transition: background-color 1s;
 		}
 
-		a,
+		a
 		button,
 		textarea,
 		p,
@@ -153,7 +153,7 @@ if (isset($_POST["getHistoric"])) {
 		h4,
 		h5,
 		h6,
-		span {
+		span:not(#historic a) {
 			color: var(--text) !important;
 			transition: background-color 1s;
 		}
@@ -188,6 +188,14 @@ if (isset($_POST["getHistoric"])) {
 
 		.dark .item-grid:hover {
 			background-color: var(--bs-danger) !important;
+		}
+
+		.dark #historic a {
+			color: white !important;
+		}
+
+		.light #historic {
+			color: var(--bs-secondary) !important;
 		}
 
 		.light .item-grid:hover {
@@ -347,7 +355,7 @@ if (isset($_POST["getHistoric"])) {
 
 							<div>
 								<!-- Lista em Navtabs os diretórios do histórico -->
-								<ul class="nav nav-tabs" id="myTab" role="tablist">
+								<ul class="nav nav-tabs" id="historic" role="tablist">
 									<li v-for="history in historic" class="nav-item d-flex align-items-center">
 										<a :href="history.name" class="nav-link text-secondary" :id="history.name" data-toggle="tab" role="tab" aria-controls="home" aria-selected="true" target="_blank"><i :class="history.type"></i> {{ history.name }}</a>
 									</li>
