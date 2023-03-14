@@ -817,11 +817,11 @@ if (isset($_POST["getHistoric"])) {
 					if ($(this).hasClass("dark")) {
 						SELF.setTheme("dark");
 						sessionStorage.setItem("theme", "dark");
-						SELF.newAlert("O tema escuro ativado!", "success");
+						SELF.newAlert("Tema escuro ativado!", "success");
 					} else {
 						SELF.setTheme("light");
 						sessionStorage.setItem("theme", "light");
-						SELF.newAlert("O tema claro ativado!", "success");
+						SELF.newAlert("Tema claro ativado!", "success");
 					}
 				});
 
