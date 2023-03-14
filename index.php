@@ -50,7 +50,7 @@ if (isset($_POST["getFavorites"])) {
 }
 if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
-	$key = "sk-xxxxxxxxxxxxxxxxxxxxxx";
+	$key = "sk-xxxxxxxxxxxxxxxxx";
 	// Requisição para a API da Open AI gpt-3.5-turbo
 	$curl = curl_init();
 	$headers = array(
@@ -416,18 +416,6 @@ if (isset($_POST["getHistoric"])) {
 							</div>
 						</div>
 					</div>
-
-					<!-- Gráfico de bolinhas -->
-					<div class="card mt-3">
-						<div class="card-header d-flex justify-content-between align-items-center">
-							<h3>Histórico de acessos</h3>
-						</div>
-						<div class="card-body">
-							<div class="chart-container">
-								<canvas id="bubbleChart"></canvas>
-							</div>
-						</div>
-					</div>
 				</div>
 
 				<!-- Footer com Copyright -->
@@ -596,7 +584,6 @@ if (isset($_POST["getHistoric"])) {
 							// remove o item do array se tiver o name igual a "./"
 							data = data.filter(item => item !== "./");
 							SELF.historic = data;
-							SELF.bubbleChart();
 						}
 					});
 				},
@@ -759,73 +746,6 @@ if (isset($_POST["getHistoric"])) {
 						}, 1000);
 						$("#loadMessage").remove();
 					});
-				},
-
-				// Grafico de do historico de acesso
-				bubbleChart: function() {
-					const SELF = this;
-
-					let dadaChart = {
-						labels: "Historico de acesso",
-						datasets: []
-					}
-
-					SELF.historic.forEach(function(item) {
-						dadaChart.datasets.push({
-							label: item.name,
-							data: item.date.map(function(date, index) {
-								// Exemplo de retorno: 10:23 = 10.23
-								return {
-									x: new Date(date).getHours() + (new Date(date).getMinutes() / 100),
-									y: new Date(date).getDay(),
-									r: item.accesses
-								};
-							}),
-							backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`,
-							borderColor: "#3e95cd",
-						});
-					});
-
-					const bubbleChart = new Chart(document.getElementById("bubbleChart"), {
-						type: 'bubble',
-						data: dadaChart,
-						options: {
-							legend: {
-								display: false
-							},
-							scales: {
-								xAxes: [{
-									ticks: {
-										display: false
-									},
-									gridLines: {
-										display: false
-									}
-								}],
-								yAxes: [{
-									ticks: {
-										display: false
-									},
-									gridLines: {
-										display: false
-									}
-								}]
-							},
-							tooltips: {
-								callbacks: {
-									label: function(tooltipItem, data) {
-										var label = data.datasets[tooltipItem.datasetIndex].label || '';
-										if (label) {
-											label += ': hr';
-										}
-										label += Math.round(tooltipItem.yLabel * 100) / 100;
-										return label;
-									}
-								}
-							}
-						}
-					});
-
 				},
 			},
 
