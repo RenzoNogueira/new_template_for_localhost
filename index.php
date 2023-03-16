@@ -2,6 +2,7 @@
 
 // Se não existir o arquivo favorites.json irá cria-lo
 $favorites = file_exists('favorites.json') ? json_decode(file_get_contents('favorites.json'), true) : createFavorites();
+
 function createFavorites()
 {
 	$favorites = [];
@@ -16,6 +17,7 @@ if (isset($_POST["addFavorite"])) {
 	}
 	die();
 }
+
 if (isset($_POST["removeFavorite"])) {
 	define("R_FAVORITE", json_decode($_POST["removeFavorite"]));
 	if (in_array(R_FAVORITE, $favorites)) { // Verifica se o favorito existe no array
@@ -28,6 +30,7 @@ if (isset($_POST["removeFavorite"])) {
 	}
 	die();
 }
+
 if (isset($_POST["directory"])) {
 	// Lê os arquivos e pastas da pasta atual e pega os seus tipos
 	$directory = json_decode($_POST["directory"]);
@@ -44,10 +47,12 @@ if (isset($_POST["directory"])) {
 	echo json_encode($files);
 	die();
 }
+
 if (isset($_POST["getFavorites"])) {
 	echo json_encode($favorites);
 	die();
 }
+
 if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
 	$key = "sk-xxxxxxxxxxxxxxxxx";
@@ -94,12 +99,14 @@ if (isset($_POST["messages"])) {
 
 	die();
 }
+
 if (isset($_POST["getUser"])) {
 	// pega o nome do usuário logado na máquina
 	define("USER", getenv('USERNAME'));
 	echo json_encode(USER);
 	die();
 }
+
 if (isset($_POST["historic"])) {
 	// Salva o histórico de conversa nos cookies
 	$historic = json_decode($_POST["historic"]);
@@ -143,8 +150,7 @@ if (isset($_POST["getHistoric"])) {
 			transition: background-color 1s;
 		}
 
-		a
-		button,
+		a button,
 		textarea,
 		p,
 		h1,
@@ -327,8 +333,30 @@ if (isset($_POST["getHistoric"])) {
 
 <body>
 	<main id="app" class="py-4">
-		<div class="container position-relative list-files ligth" :class="{'light': themeAplycated === 'light', 'dark': themeAplycated === 'dark'}">
-			<div class="row">
+		<!-- Fim NavBar menu hamburguer -->
+		<nav class="navbar navbar-light">
+			<div class="container-fluid">
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse ps-2 mt-2" id="navbarNav">
+					<ul class="navbar-nav">
+						<li class="nav-item">
+							<a id="link-list-files" class="nav-link active" aria-current="page" href="#" @click="togglePanel('list-files')">Arquivos</a>
+						</li>
+						<li class="nav-item">
+							<a id="link-data-base" class="nav-link" href="#" @click="togglePanel('data-base')">Banco de dados</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		<!-- Fim NavBar menu hamburguer -->
+
+		<div class="container position-relative list-files ligth mt-4" :class="{'light': themeAplycated === 'light', 'dark': themeAplycated === 'dark'}">
+
+			<!-- Painel de arquivos -->
+			<div class="row panel" id="list-files">
 				<div class="col-md-8">
 					<div class="card">
 						<div class="card-header d-flex justify-content-between align-items-center">
@@ -429,25 +457,47 @@ if (isset($_POST["getHistoric"])) {
 						</div>
 					</div>
 				</div>
+			</div>
 
-				<!-- Footer com Copyright -->
-				<div class="mt-2">
-					<div>
-						<div class="card">
-							<div class="card-footer">
-								<p class="text-center">
-									<small> <i class="fa fa-copyright"></i> <span class="px-2">Copyright <?= date('Y') ?></span>
-										<span>-</span> <span class="px-2">Desenvolvido por</span>
-										<span>Renzo Nogueira</span>
-									</small>
-								</p>
+			<!-- Painel Banco de Dados -->
+			<div class="row panel d-none" id="data-base">
+				<div class="col-md-12">
+					<div class="card">
+						<div class="card-header d-flex justify-content-between align-items-center">
+							<h3>Banco de Dados</h3>
+							<button class="btn btn-link p-0" @click="updateDatabase">
+								<i class="fas fa-sync-alt"></i>
+							</button>
+						</div>
+						<div class="card-body">
+							<div class="row">
 							</div>
 						</div>
 					</div>
 				</div>
-				<div class="position-fixed" id="alerts" style="bottom: 30px; right: 20px; max-width: 600px;"></div>
 			</div>
+
+			<!-- Footer com Copyright -->
+			<div class="mt-2">
+				<div>
+					<div class="card">
+						<div class="card-footer">
+							<p class="text-center">
+								<small> <i class="fa fa-copyright"></i> <span class="px-2">Copyright <?= date('Y') ?></span>
+									<span>-</span> <span class="px-2">Desenvolvido por</span>
+									<span>Renzo Nogueira</span>
+								</small>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="position-fixed" id="alerts" style="bottom: 30px; right: 20px; max-width: 600px;"></div>
+		</div>
+
+
 	</main>
+
 	<script src="https://kit.fontawesome.com/274af9ab8f.js" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -548,6 +598,20 @@ if (isset($_POST["getHistoric"])) {
 			},
 
 			methods: {
+				// Adiciona um favorito
+				addFavorite: function(file) {
+					const SELF = this;
+					$.post({
+						url: 'index.php',
+						type: 'POST',
+						data: {
+							addFavorite: JSON.stringify(`${file.name}`)
+						}
+					}).done(function(data) {
+						SELF.getFavorites();
+					});
+				},
+
 				newAlert: function(text, type) {
 					const idCount = $(".alert").length; // Conta quantos alertas existem
 					$("#alerts").append(`<div id="alert-${idCount}" class="alert alert-${type}">${text}</div>`);
@@ -557,6 +621,15 @@ if (isset($_POST["getHistoric"])) {
 							$(this).remove();
 						});
 					}, 3000);
+				},
+
+				// Trocar entre as abas
+				togglePanel: function(panel) {
+					$(".panel").addClass("d-none");
+					$(`#${panel}`).removeClass("d-none");
+					$(".nav-link").removeClass("active");
+					$(`#link-${panel}`).addClass("active");
+					this.newAlert(`Você está na aba ${panel}`, "success");
 				},
 
 				setHistory: function(itemClicked) {
@@ -691,20 +764,6 @@ if (isset($_POST["getHistoric"])) {
 						}
 					}).done(function(data) {
 						SELF.favorites = JSON.parse(data);
-					});
-				},
-
-				// Adiciona um favorito
-				addFavorite: function(file) {
-					const SELF = this;
-					$.post({
-						url: 'index.php',
-						type: 'POST',
-						data: {
-							addFavorite: JSON.stringify(`${file.name}`)
-						}
-					}).done(function(data) {
-						SELF.getFavorites();
 					});
 				},
 
