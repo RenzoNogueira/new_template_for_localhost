@@ -8,4 +8,4 @@ Move "index.php" to your localhost.
   <img src="https://rz.dev.br/assets/img/logo/Standard%20Logo%20Files/Original%20on%20Transparent.png" alt="rz.dev.br" width="400px">
 </a>
 
-@2022 - Developed by Renzo Nogueira.
+@2023 - Developed by Renzo Nogueira.
