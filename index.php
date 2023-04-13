@@ -435,7 +435,19 @@ if (isset($_POST["getHistoric"])) {
 				</div>
 
 				<div class="col-md-4">
+					<!-- Campo de pesquisa dos arquivos -->
 					<div class="card">
+						<div class="card-header d-flex justify-content-between align-items-center">
+							<h3>Pesquisar na lista</h3>
+						</div>
+						<div class="card-body">
+							<div class="input-group mb-3">
+								<input id="search" type="text" class="form-control" placeholder="Pesquisar..." aria-label="Pesquisar..." aria-describedby="button-addon2" v-model="search">
+								<button class="btn btn-outline-secondary" type="button" id="button-addon2" @click="searchFiles(search)"><i class="fas fa-search"></i></button>
+							</div>
+						</div>
+					</div>
+					<div class="card mt-2">
 						<div class="card-header d-flex justify-content-between align-items-center">
 							<h3>Assistente</h3>
 						</div>
@@ -573,7 +585,8 @@ if (isset($_POST["getHistoric"])) {
 					messages: [{
 						role: "assistant",
 						content: "Olá {{userName}}, eu sou o seu assistente virtual, como posso te ajudar?"
-					}]
+					}],
+					search: "",
 				}
 			},
 			// Inicialização
@@ -593,6 +606,14 @@ if (isset($_POST["getHistoric"])) {
 						$(".alert").fadeTo(1000, 0.5).slideUp(500, function() {
 							$(this).remove();
 						});
+					}
+				},
+				search: function(value) {
+					if (value.length > 0) {
+						this.files = this.files.filter(file => file.name.toLowerCase().includes(value.toLowerCase()));
+						this.folders = this.folders.filter(folder => folder.name.toLowerCase().includes(value.toLowerCase()));
+					} else {
+						this.openFolder();
 					}
 				}
 			},
@@ -728,6 +749,9 @@ if (isset($_POST["getHistoric"])) {
 									});
 								}
 							});
+
+							// Remove os arquivos favorites.json, index.php, .git, README.md, .gitignore, LICENSE, .idea
+							SELF.files = SELF.files.filter(item => item.name !== "favorites.json" && item.name !== "index.php" && item.name !== ".git" && item.name !== "README.md" && item.name !== ".gitignore" && item.name !== "LICENSE" && item.name !== ".idea");
 						}
 					});
 				},
