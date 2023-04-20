@@ -1,5 +1,9 @@
 <?php
 
+$keys = json_decode(file_get_contents('.env'), true);
+define("KEY_OPENAI", $keys["KEY_OPENAI"]);
+define("KEY_PEXELS", $keys["KEY_PEXELS"]);
+
 // Se não existir o arquivo favorites.json irá cria-lo
 $favorites = file_exists('favorites.json') ? json_decode(file_get_contents('favorites.json'), true) : createFavorites();
 
@@ -7,6 +11,52 @@ function createFavorites()
 {
 	$favorites = [];
 	file_put_contents('favorites.json', json_encode($favorites));
+}
+
+// Função para o chatbot
+function chatbot($messages, $treinamento)
+{
+	// global KEY_OPENAI;
+	// Requisição para a API da Open AI gpt-3.5-turbo
+	$curl = curl_init();
+	$headers = array(
+		"Content-Type: application/json",
+		"Authorization: Bearer " . KEY_OPENAI
+	);
+	// Adiconar treinamento na primeira posição do array messages
+	$treinamento = [
+		"role" => "system",
+		"content" => $treinamento
+	];
+	array_unshift($messages, $treinamento);
+	curl_setopt_array($curl, array(
+		CURLOPT_URL => "https://api.openai.com/v1/chat/completions",
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_ENCODING => "",
+		CURLOPT_MAXREDIRS => 10,
+		CURLOPT_TIMEOUT => 30,
+		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		CURLOPT_CUSTOMREQUEST => "POST",
+		CURLOPT_POSTFIELDS => json_encode(array(
+			"model" => "gpt-3.5-turbo",
+			"messages" =>  $messages,
+			"max_tokens" => 100,
+			"temperature" => 0.7,
+		)),
+		CURLOPT_HTTPHEADER => $headers,
+	));
+
+	$response = curl_exec($curl);
+	$err = curl_error($curl);
+	curl_close($curl);
+
+	if ($err) {
+		return "cURL Error #:" . $err;
+	} else {
+		$response = json_decode($response, true);
+		$response = $response["choices"][0]["message"];
+		return $response;
+	}
 }
 
 if (isset($_POST["addFavorite"])) {
@@ -55,48 +105,8 @@ if (isset($_POST["getFavorites"])) {
 
 if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
-	$key = "sk-xxxxxxxxxxxxxxxxx";
-	// Requisição para a API da Open AI gpt-3.5-turbo
-	$curl = curl_init();
-	$headers = array(
-		"Content-Type: application/json",
-		"Authorization: Bearer " . $key,
-	);
-	// Adiconar treinamento na primeira posição do array messages
-	$treinamento = [
-		"role" => "system",
-		"content" => "Meu objetivo como bot auxiliar é fornecer suporte e orientação para programadores em tarefas básicas do cotidiano. Posso ajudar na escolha de uma linguagem de programação, encontrar tutoriais ou sugerir abordagens para resolver problemas específicos de programação. Por favor, me forneça uma tarefa específica para que eu possa ajudá-lo."
-	];
-	array_unshift($messages, $treinamento);
-	curl_setopt_array($curl, array(
-		CURLOPT_URL => "https://api.openai.com/v1/chat/completions",
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_ENCODING => "",
-		CURLOPT_MAXREDIRS => 10,
-		CURLOPT_TIMEOUT => 30,
-		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		CURLOPT_CUSTOMREQUEST => "POST",
-		CURLOPT_POSTFIELDS => json_encode(array(
-			"model" => "gpt-3.5-turbo",
-			"messages" =>  $messages,
-			"max_tokens" => 100,
-			"temperature" => 0.7,
-		)),
-		CURLOPT_HTTPHEADER => $headers,
-	));
-
-	$response = curl_exec($curl);
-	$err = curl_error($curl);
-	curl_close($curl);
-
-	if ($err) {
-		echo "cURL Error #:" . $err;
-	} else {
-		$response = json_decode($response, true);
-		$response = $response["choices"][0]["message"];
-		echo json_encode($response);
-	}
-
+	$treinamento = "Meu objetivo como bot auxiliar é fornecer suporte e orientação para programadores em tarefas básicas do cotidiano. Posso ajudar na escolha de uma linguagem de programação, encontrar tutoriais ou sugerir abordagens para resolver problemas específicos de programação. Por favor, me forneça uma tarefa específica para que eu possa ajudá-lo.";
+	echo chatbot($messages, $treinamento);
 	die();
 }
 
@@ -122,12 +132,70 @@ if (isset($_POST["historic"])) {
 if (isset($_POST["getHistoric"])) {
 	// Pega o histórico de conversa nos cookies
 	$historic = json_decode($_COOKIE["historic"]);
-	echo json_encode($historic);
 	die();
 }
+
+// Pega uma busca aleatória diária com o chatbot
+$day = date("d");
+// Compara com o dia anterior salvo nos cookies
+$requestDataVideo = [];
+if (isset($_COOKIE["day"]) && isset($_COOKIE["requestVideo"]) && $_COOKIE["day"] == $day) {
+	// Pega a busca salva nos cookies
+	$request = json_decode($_COOKIE["requestVideo"]);
+	$requestVideo = $request[0];
+	$requestKeyword = $request[1];
+	$requestDataVideo = changeVideoBackground($requestKeyword);
+} else {
+	$requestDataVideo = changeVideoBackground();
+}
+
+if (isset($_POST["changeVideoBackground"])) {
+	$requestDataVideo = changeVideoBackground();
+	echo json_encode($requestDataVideo);
+	die();
+}
+
+function changeVideoBackground($keyVideo = "")
+{
+	if ($keyVideo == "") {
+		// Conversa com o chat para pegar uma busca aleatória
+		$messages = [
+			[
+				"role" => "user",
+				"content" => "Olá, você quer um vídeo de fundo? Qualquer coisa, responda com uma palavra-chave, em inglês, caixa baixa. Exemplo: people, nature, technology, animals, music, etc."
+			]
+		];
+		$keyVideo = chatbot($messages, "Olá, você quer um vídeo de fundo? Qualquer coisa, responda com uma palavra-chave para a busca, em inglês, caixa baixa.");
+		$keyVideo = $keyVideo["content"];
+	}
+	// Vídeo background
+	$ch = curl_init();
+	// Cabeçalho da requisição
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+		'Authorization: ' . KEY_PEXELS
+	));
+	$count = 20;
+	curl_setopt($ch, CURLOPT_URL, "https://api.pexels.com/videos/search?query={$keyVideo}&orientation=landscape&size=medium&per_page={$count}");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	$result = curl_exec($ch);
+	curl_close($ch);
+	$json = json_decode($result, true);
+	$videos = $json['videos'];
+	// Randomiza o vídeo a posição do array
+	$p = rand(0, $count - 1);
+	$requestVideo = $videos[$p]['video_files'][0]['link'];
+	// Salva a busca nos cookies durante um dia
+	setcookie("requestVideo", json_encode([$requestVideo, $keyVideo]), time() + 60 * 60 * 24 * 7);
+	setcookie("day", date("d"), time() + 60 * 60 * 24 * 7);
+	return [
+		"requestVideo" => $requestVideo,
+		"requestKeyword" => $keyVideo
+	];
+}
+
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
 	<meta charset="UTF-8">
@@ -228,6 +296,21 @@ if (isset($_POST["getHistoric"])) {
 		.element-item:hover {
 			filter: brightness(0.9);
 			transform: scale(1.009);
+		}
+
+		/* Vídeo background */
+		video {
+			position: fixed;
+			right: 0;
+			bottom: 0;
+			min-width: 100%;
+			min-height: 100%;
+			z-index: -1;
+			object-fit: cover;
+		}
+
+		#btn-change-background {
+			z-index: 999 !important;
 		}
 
 		/* Deslizar da esquerda para a direita */
@@ -331,14 +414,21 @@ if (isset($_POST["getHistoric"])) {
 	</style>
 </head>
 
-<body>
+<body class="position-relative">
+	<!-- Brackground video -->
+	<video autoplay muted loop id="myVideo" id="video-background" class="video-background position-fixed w-100 h-100 top-0 left-0 m-0 p-0" preload="auto" playsinline>
+		<source src="<?= $requestDataVideo["requestVideo"]; ?>" type="video/mp4">
+	</video>
 	<main id="app" class="py-4">
 		<!-- Fim NavBar menu hamburguer -->
 		<nav class="navbar navbar-light">
 			<div class="container-fluid">
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
+				<div>
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<span class="navbar-brand mb-0 ms-4 h4"><?= $requestDataVideo["requestKeyword"]; ?></span>
+				</div>
 				<div class="collapse navbar-collapse ps-2 mt-2" id="navbarNav">
 					<ul class="navbar-nav">
 						<li class="nav-item">
@@ -352,6 +442,15 @@ if (isset($_POST["getHistoric"])) {
 			</div>
 		</nav>
 		<!-- Fim NavBar menu hamburguer -->
+
+		<!-- Botão para trocar o plano de fundo -->
+		<div class="position-fixed top-0 end-0 m-3">
+			<div>
+				<button class="btn btn-sm border" id="btn-change-background" @click="changeBackground">
+					<i class="fas fa-sync-alt text-white"></i>
+				</button>
+			</div>
+		</div>
 
 		<div class="container position-relative list-files ligth mt-4" :class="{'light': themeAplycated === 'light', 'dark': themeAplycated === 'dark'}">
 
@@ -852,6 +951,17 @@ if (isset($_POST["getHistoric"])) {
 							scrollTop: $("#chat #response").prop("scrollHeight")
 						}, 1000);
 						$("#loadMessage").remove();
+					});
+				},
+
+				// Muda o vídeo do background
+				changeBackground: function() {
+					$.post("#", {
+						changeVideoBackground: true
+					}).done(function(data) {
+						data = JSON.parse(data);
+						console.log(data);
+						$("video").attr("src", data);
 					});
 				},
 			},
