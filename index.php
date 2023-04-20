@@ -40,7 +40,7 @@ function chatbot($messages, $treinamento)
 		CURLOPT_POSTFIELDS => json_encode(array(
 			"model" => "gpt-3.5-turbo",
 			"messages" =>  $messages,
-			"max_tokens" => 100,
+			"max_tokens" => 300,
 			"temperature" => 0.7,
 		)),
 		CURLOPT_HTTPHEADER => $headers,
