@@ -158,15 +158,42 @@ if (isset($_POST["changeVideoBackground"])) {
 function changeVideoBackground($keyVideo = "")
 {
 	if ($keyVideo == "") {
-		// Conversa com o chat para pegar uma busca aleatória
-		$messages = [
-			[
-				"role" => "user",
-				"content" => "Olá, você quer um vídeo de fundo? Qualquer coisa, responda com uma palavra-chave, em inglês, caixa baixa. Exemplo: people, nature, technology, animals, music, etc."
-			]
-		];
-		$keyVideo = chatbot($messages, "Olá, você quer um vídeo de fundo? Qualquer coisa, responda com uma palavra-chave para a busca, em inglês, caixa baixa.");
-		$keyVideo = $keyVideo["content"];
+
+		$videoThemes = array(
+			"technology",
+			"fashion",
+			"travel",
+			"food",
+			"fitness",
+			"beauty",
+			"diy",
+			"gaming",
+			"music",
+			"art",
+			"education",
+			"entertainment",
+			"news",
+			"sports",
+			"business",
+			"finance",
+			"politics",
+			"science",
+			"health",
+			"lifestyle",
+			"culture",
+			"humor",
+			"spirituality",
+			"environment",
+			"history",
+			"social media",
+			"product reviews",
+			"interviews",
+			"tutorials",
+			"comedy",
+			"animation"
+		);
+
+		$keyVideo = $videoThemes[rand(0, count($videoThemes) - 1)];
 	}
 	// Vídeo background
 	$ch = curl_init();
@@ -182,7 +209,7 @@ function changeVideoBackground($keyVideo = "")
 	$json = json_decode($result, true);
 	$videos = $json['videos'];
 	// Randomiza o vídeo a posição do array
-	$p = rand(0, $count - 1);
+	$p = rand(0, count($videos) - 1);
 	$requestVideo = $videos[$p]['video_files'][0]['link'];
 	// Salva a busca nos cookies durante um dia
 	setcookie("requestVideo", json_encode([$requestVideo, $keyVideo]), time() + 60 * 60 * 24 * 7);
@@ -415,10 +442,6 @@ function changeVideoBackground($keyVideo = "")
 </head>
 
 <body class="position-relative">
-	<!-- Brackground video -->
-	<video autoplay muted loop id="myVideo" id="video-background" class="video-background position-fixed w-100 h-100 top-0 left-0 m-0 p-0" preload="auto" playsinline>
-		<source src="<?= $requestDataVideo["requestVideo"]; ?>" type="video/mp4">
-	</video>
 	<main id="app" class="py-4">
 		<!-- Fim NavBar menu hamburguer -->
 		<nav class="navbar navbar-light">
@@ -427,7 +450,7 @@ function changeVideoBackground($keyVideo = "")
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
 					</button>
-					<span class="navbar-brand mb-0 ms-4 h4"><?= $requestDataVideo["requestKeyword"]; ?></span>
+					<span class="navbar-brand mb-0 ms-4 h4">{{ keyWordVideo}}</span>
 				</div>
 				<div class="collapse navbar-collapse ps-2 mt-2" id="navbarNav">
 					<ul class="navbar-nav">
@@ -606,6 +629,11 @@ function changeVideoBackground($keyVideo = "")
 			<div class="position-fixed" id="alerts" style="bottom: 30px; right: 20px; max-width: 600px;"></div>
 		</div>
 
+		<!-- Brackground video -->
+		<video autoplay muted loop id="myVideo" id="video-background" class="video-background position-fixed w-100 h-100 top-0 left-0 m-0 p-0" preload="auto" playsinline>
+			<source src="<?= $requestDataVideo["requestVideo"]; ?>" type="video/mp4">
+		</video>
+
 
 	</main>
 
@@ -686,6 +714,8 @@ function changeVideoBackground($keyVideo = "")
 						content: "Olá {{userName}}, eu sou o seu assistente virtual, como posso te ajudar?"
 					}],
 					search: "",
+					srcVideo: "<?= $requestDataVideo["requestVideo"]; ?>",
+					keyWordVideo: "<?= $requestDataVideo["requestKeyword"]; ?>",
 				}
 			},
 			// Inicialização
@@ -956,12 +986,15 @@ function changeVideoBackground($keyVideo = "")
 
 				// Muda o vídeo do background
 				changeBackground: function() {
+					const SELF = this;
 					$.post("#", {
 						changeVideoBackground: true
 					}).done(function(data) {
 						data = JSON.parse(data);
-						console.log(data);
-						$("video").attr("src", data);
+						SELF.srcVideo = data.requestVideo
+						SELF.keyWordVideo = data.requestKeyword;
+						$("video").attr("src", SELF.srcVideo);
+						console.log(SELF.keyWordVideo);
 					});
 				},
 			},
