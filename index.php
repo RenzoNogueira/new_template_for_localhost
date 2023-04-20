@@ -106,7 +106,7 @@ if (isset($_POST["getFavorites"])) {
 if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
 	$treinamento = "Meu objetivo como bot auxiliar é fornecer suporte e orientação para programadores em tarefas básicas do cotidiano. Posso ajudar na escolha de uma linguagem de programação, encontrar tutoriais ou sugerir abordagens para resolver problemas específicos de programação. Por favor, me forneça uma tarefa específica para que eu possa ajudá-lo.";
-	echo chatbot($messages, $treinamento);
+	echo json_encode(chatbot($messages, $treinamento));
 	die();
 }
 
