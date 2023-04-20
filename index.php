@@ -181,15 +181,14 @@ function changeVideoBackground($keyVideo = "")
 			"health",
 			"lifestyle",
 			"culture",
-			"humor",
+			// "humor",
 			"spirituality",
 			"environment",
 			"history",
 			"social media",
-			"product reviews",
 			"interviews",
-			"tutorials",
-			"comedy",
+			// "tutorials",
+			// "comedy",
 			"animation"
 		);
 
