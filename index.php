@@ -1,5 +1,12 @@
 <?php
 
+/*
+TODO
+- Adicionar configuração de interesses para o tema do plano de fundo
+- Adicionar botão para desabilitar o plano de fundo
+- Terminar página de gerenciamento do banco de dados.
+*/
+
 $keys = json_decode(file_get_contents('.env'), true);
 define("KEY_OPENAI", $keys["KEY_OPENAI"]);
 define("KEY_PEXELS", $keys["KEY_PEXELS"]);
@@ -105,7 +112,7 @@ if (isset($_POST["getFavorites"])) {
 
 if (isset($_POST["messages"])) {
 	$messages = json_decode($_POST["messages"]);
-	$treinamento = "Meu objetivo como bot auxiliar é fornecer suporte e orientação para programadores em tarefas básicas do cotidiano. Posso ajudar na escolha de uma linguagem de programação, encontrar tutoriais ou sugerir abordagens para resolver problemas específicos de programação. Por favor, me forneça uma tarefa específica para que eu possa ajudá-lo.";
+	$treinamento = "Meu objetivo como bot auxiliar e fornecer suporte e orientação para programadores em tarefas básicas do cotidiano. Posso ajudar na escolha de uma linguagem de programação, encontrar tutoriais ou sugerir abordagens para resolver problemas específicos de programação. Por favor, me forneça uma tarefa específica para que eu possa ajudá-lo.";
 	echo json_encode(chatbot($messages, $treinamento));
 	die();
 }
