@@ -885,8 +885,8 @@ function changeVideoBackground($keyVideo = "")
 								}
 							});
 
-							// Remove os arquivos favorites.json, index.php, .git, README.md, .gitignore, LICENSE, .idea
-							SELF.files = SELF.files.filter(item => item.name !== "favorites.json" && item.name !== "index.php" && item.name !== ".git" && item.name !== "README.md" && item.name !== ".gitignore" && item.name !== "LICENSE" && item.name !== ".idea");
+							// Remove os arquivos favorites.json, index.php, .git, README.md, .gitignore, LICENSE, .idea, .env
+							SELF.files = SELF.files.filter(item => item.name !== "favorites.json" && item.name !== "index.php" && item.name !== ".git" && item.name !== "README.md" && item.name !== ".gitignore" && item.name !== "LICENSE" && item.name !== ".idea" && item.name !== ".env");
 						}
 					});
 				},
