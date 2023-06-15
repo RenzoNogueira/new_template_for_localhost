@@ -139,6 +139,12 @@ if (isset($_POST["historic"])) {
 if (isset($_POST["getHistoric"])) {
 	// Pega o histórico de conversa nos cookies
 	$historic = json_decode($_COOKIE["historic"]);
+	// Verifica se o histórico existe
+	if ($historic) {
+		echo json_encode($historic);
+	} else {
+		echo json_encode([]);
+	}
 	die();
 }
 
@@ -444,6 +450,10 @@ function changeVideoBackground($keyVideo = "")
 			filter: brightness(0.9);
 			transform: scale(1.009);
 		}
+
+		.theme-background-keyword {
+			background-color: var(--background_4) !important;
+		}
 	</style>
 </head>
 
@@ -452,13 +462,13 @@ function changeVideoBackground($keyVideo = "")
 		<!-- Fim NavBar menu hamburguer -->
 		<nav class="navbar navbar-light">
 			<div class="container-fluid">
-				<div>
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<div class="theme-background-keyword border border-light rounded-3 px-2">
+					<!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
-					</button>
+					</button> -->
 					<span class="navbar-brand mb-0 ms-4 h4">{{ keyWordVideo}}</span>
 				</div>
-				<div class="collapse navbar-collapse ps-2 mt-2" id="navbarNav">
+				<!-- <div class="collapse navbar-collapse ps-2 mt-2" id="navbarNav">
 					<ul class="navbar-nav">
 						<li class="nav-item">
 							<a id="link-list-files" class="nav-link active" aria-current="page" href="#" @click="togglePanel('list-files')">Arquivos</a>
@@ -467,7 +477,7 @@ function changeVideoBackground($keyVideo = "")
 							<a id="link-data-base" class="nav-link" href="#" @click="togglePanel('data-base')">Banco de dados</a>
 						</li>
 					</ul>
-				</div>
+				</div> -->
 			</div>
 		</nav>
 		<!-- Fim NavBar menu hamburguer -->
@@ -481,7 +491,7 @@ function changeVideoBackground($keyVideo = "")
 			</div>
 		</div>
 
-		<div class="container position-relative list-files ligth mt-4" :class="{'light': themeAplycated === 'light', 'dark': themeAplycated === 'dark'}">
+		<div class="container position-relative list-files mt-4" :class="{'light': themeAplycated === 'light', 'dark': themeAplycated === 'dark'}">
 
 			<!-- Painel de arquivos -->
 			<div class="row panel" id="list-files">
@@ -525,7 +535,7 @@ function changeVideoBackground($keyVideo = "")
 									<li v-for="(file, index) in files" class="list-group-item element-item border-0">
 										<!-- Verifica de o index é par ou impar -->
 										<div :class="['row','file-item', index % 2 === 0 ? 'bg-light' : 'bg-white']">
-											<div class="col-md-12 d-flex justify-content-between p-0">
+											<div class="col-md-12 d-flex justify-content-between px-3">
 												<span>
 													<i :class="[file.type, (file.type.includes('fa-folder') ? 'text-warning': 'text-secondary')]"></i> <a @click="setHistory({name:file.name, type:file.type})" :href="file.name" :title="file.name" class="text-decoration-none text-dark" target="_blank">{{ file.name }}</a>
 												</span>
@@ -593,24 +603,6 @@ function changeVideoBackground($keyVideo = "")
 								<input id="inputUser" type="text" class="form-control" v-model="message" placeholder="Digite aqui...">
 								<button type="button" class="btn btn-primary ms-2 text-light" id="btnSend" @click="sendMessage()">Enviar
 								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Painel Banco de Dados -->
-			<div class="row panel d-none" id="data-base">
-				<div class="col-md-12">
-					<div class="card">
-						<div class="card-header d-flex justify-content-between align-items-center">
-							<h3>Banco de Dados</h3>
-							<button class="btn btn-link p-0" @click="updateDatabase">
-								<i class="fas fa-sync-alt"></i>
-							</button>
-						</div>
-						<div class="card-body">
-							<div class="row">
 							</div>
 						</div>
 					</div>
@@ -696,11 +688,11 @@ function changeVideoBackground($keyVideo = "")
 					},
 					themes: {
 						light: {
-							background_1: 'none',
-							background_2: 'none',
-							background_3: 'none',
-							background_4: 'none',
-							text: '#000000'
+							background_1: '#F9F9F9',
+							background_2: '#FFFFFF',
+							background_3: '#E5E5E5',
+							background_4: '#F2F2F2',
+							text: '#333333'
 						},
 						dark: {
 							background_1: '#181818',
@@ -820,7 +812,7 @@ function changeVideoBackground($keyVideo = "")
 				getHistory: function() {
 					const SELF = this;
 					$.post({
-						url: 'index.php',
+						url: '#',
 						type: 'POST',
 						data: {
 							getHistoric: true
@@ -946,7 +938,7 @@ function changeVideoBackground($keyVideo = "")
 					SELF.themes[theme].text;
 
 					Object.keys(SELF.themes[theme]).map(function(key) {
-						$(`html`).css(`--${key}`, SELF.themes[theme][key]);
+						$(`:root`).css(`--${key}`, SELF.themes[theme][key]);
 					});
 
 					SELF.themeAplycated = theme;
@@ -1000,7 +992,6 @@ function changeVideoBackground($keyVideo = "")
 						SELF.srcVideo = data.requestVideo
 						SELF.keyWordVideo = data.requestKeyword;
 						$("video").attr("src", SELF.srcVideo);
-						console.log(SELF.keyWordVideo);
 					});
 				},
 			},
@@ -1027,19 +1018,20 @@ function changeVideoBackground($keyVideo = "")
 					this.newAlert(`Seja bem vindo ${this.userName}!`, "success")
 					this.newAlert("A lista será atualizada daqui <b>1</b> minuto.", "info")
 					const THEME_SAVE = localStorage.getItem("theme");
-					if (THEME_SAVE) { // Verifica se existe um tema salvo
+					if (THEME_SAVE && THEME_SAVE === "dark") { // Verifica se existe um tema salvo
 						SELF.themeAplycated = THEME_SAVE
-						if (SELF.themeAplycated === "dark") {
 							SELF.setTheme(SELF.themeAplycated);
 							BTN_THEME.toggleClass("dark light");
 							BTN_THEME.toggleClass("fa-sun text-dark fa-moon text-light");
 							BTN_LAYOUT.toggleClass("dark light");
 							BTN_LAYOUT.toggleClass("text-dark text-light");
 							SELF.newAlert("O tema escuro está ativado!", "warning");
-						}
+					} else {
+						SELF.themeAplycated = "light";
+						SELF.setTheme("light");
 					}
 
-					if (sessionStorage.getItem("layout") == "list") {
+					if (localStorage.getItem("layout") === "list") {
 						SELF.themes.layout.selected = true;
 						BTN_LAYOUT.toggleClass("list grid");
 						BTN_LAYOUT.toggleClass("fa-th-large fa-list");
@@ -1056,11 +1048,11 @@ function changeVideoBackground($keyVideo = "")
 					BTN_LAYOUT.toggleClass("text-dark text-light");
 					if ($(this).hasClass("dark")) {
 						SELF.setTheme("dark");
-						sessionStorage.setItem("theme", "dark");
+						localStorage.setItem("theme", "dark");
 						SELF.newAlert("Tema escuro ativado!", "success");
 					} else {
 						SELF.setTheme("light");
-						sessionStorage.setItem("theme", "light");
+						localStorage.setItem("theme", "light");
 						SELF.newAlert("Tema claro ativado!", "success");
 					}
 				});
@@ -1070,11 +1062,11 @@ function changeVideoBackground($keyVideo = "")
 					$(this).toggleClass("fa-list fa-th-large");
 					if ($(this).hasClass("list")) {
 						SELF.layout = "list";
-						sessionStorage.setItem("layout", "list");
+						localStorage.setItem("layout", "list");
 						SELF.newAlert("O layout de lista ativado!", "success");
 					} else {
 						SELF.layout = "grid";
-						sessionStorage.setItem("layout", "grid");
+						localStorage.setItem("layout", "grid");
 						SELF.newAlert("O layout de grade ativado!", "success");
 					}
 					SELF.themes.layout.selected = !SELF.themes.layout.selected; // Atualiza o layout
