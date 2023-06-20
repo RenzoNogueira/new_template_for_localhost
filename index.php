@@ -459,28 +459,15 @@ function changeVideoBackground($keyVideo = "")
 
 <body class="position-relative">
 	<main id="app" class="py-4">
-		<!-- Fim NavBar menu hamburguer -->
+		<!-- Fim NavBar -->
 		<nav class="navbar navbar-light">
 			<div class="container-fluid">
 				<div class="theme-background-keyword border border-light rounded-3 px-2">
-					<!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span>
-					</button> -->
 					<span class="navbar-brand mb-0 ms-4 h4">{{ keyWordVideo}}</span>
 				</div>
-				<!-- <div class="collapse navbar-collapse ps-2 mt-2" id="navbarNav">
-					<ul class="navbar-nav">
-						<li class="nav-item">
-							<a id="link-list-files" class="nav-link active" aria-current="page" href="#" @click="togglePanel('list-files')">Arquivos</a>
-						</li>
-						<li class="nav-item">
-							<a id="link-data-base" class="nav-link" href="#" @click="togglePanel('data-base')">Banco de dados</a>
-						</li>
-					</ul>
-				</div> -->
 			</div>
 		</nav>
-		<!-- Fim NavBar menu hamburguer -->
+		<!-- Fim NavBar -->
 
 		<!-- Botão para trocar o plano de fundo -->
 		<div class="position-fixed top-0 end-0 m-3">
